@@ -74,10 +74,15 @@ public class VpIndicator extends View {
         viewHeight=heightSize;
 
         setMeasuredDimension(widthSize, heightSize);
-        initFixedLabelPositions();
-        preInitPath(0,0f);
-        initPath();
+        if (firstStart){
+            initFixedLabelPositions();
+            preInitPath(0,0f);
+            initPath();
+            firstStart=false;
+        }
     }
+
+    boolean firstStart=true;
 
     int viewWidth,viewHeight;
 
