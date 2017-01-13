@@ -6,8 +6,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.os.Handler;
+import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Administrator on 2016/11/7.
@@ -62,7 +68,22 @@ public class VpIndicator extends View {
 
         path =new Path();
 
+        fixedThreadPool  = Executors.newSingleThreadExecutor();
+        handler=new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                postInvalidate();
+            }
+        };
+
     }
+
+
+    ExecutorService fixedThreadPool ;
+    Handler handler;
+
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -197,16 +218,27 @@ public class VpIndicator extends View {
         path.lineTo(helperPoints_21[1].x, helperPoints_21[1].y);
         path.quadTo(temp1.x,temp1.y,helperPoints_12[1].x, helperPoints_12[1].y);
 
+        Log.i("BBB","initPath:"+Thread.currentThread().getName());
+
     }
 
 
-    public void update(int position,float progress){
+    public void update(final int position, final float progress){
         if(position>=(totalCounts-1)){
             return;
         }
-        preInitPath(position,progress);
-        initPath();
-        invalidate();
+//        preInitPath(position,progress);
+//        initPath();
+//        invalidate();
+        fixedThreadPool.execute(new Runnable(){
+            @Override
+            public void run() {
+                preInitPath(position,progress);
+                initPath();
+                handler.sendEmptyMessage(1);
+            }
+        });
+
     }
 
 
